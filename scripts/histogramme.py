@@ -2,10 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import use_data
 import IsInclude
+import os
 
 
-
-def histo(filename, dictFilename, dist, type, dictType):
+def histo(filename, dictFilename, dist, type, dictType, path):
+    fullpath= f"{path}_histo_{dictFilename[filename]}_{str(dist*1e-3).removesuffix('.0')}_{dictType[type]}.png"
+       
     gdf = use_data.create_gdf(filename, 'cheflieu') # dataframe du fichier csv choisi
     n = gdf.count()[0] # number of total rounds
     A = []
@@ -21,12 +23,13 @@ def histo(filename, dictFilename, dist, type, dictType):
     plt.xlabel('Nombre de tournées dans un rayon de '+str(dist*1e-3)+' km pour des utilisateurs différents ('+dictType[type]+' inclusion)')
     plt.ylabel('Fréquence')
     plt.rcParams['svg.fonttype'] = 'none'
-    plt.show()
+    plt.savefig(fullpath)
+    #plt.show()
     return 'Histogramme [ '+dictFilename[filename]+' '+dictType[type]+' '+str(dist*1e-3)+' ] tracé !'
 
 
 
-def histo_comparaison(single_incluson, double_inclusion, type):
+def histo_comparaison(single_inclusion, double_inclusion, type):
 
     labels = ['50 km', '100 km', '150 km']
 
@@ -34,7 +37,7 @@ def histo_comparaison(single_incluson, double_inclusion, type):
     width = 0.35  # the width of the bars
 
     fig, ax = plt.subplots()
-    rects1 = ax.bar(x - width/2, single_incluson, width, label='simple inclusion', color='deepskyblue')
+    rects1 = ax.bar(x - width/2, single_inclusion, width, label='simple inclusion', color='deepskyblue')
     rects2 = ax.bar(x + width/2, double_inclusion, width, label='double inclusion', color='mediumorchid')
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
@@ -52,7 +55,7 @@ def histo_comparaison(single_incluson, double_inclusion, type):
     autolabel(rects1, ax)
     autolabel(rects2, ax)
     fig.tight_layout()
-    plt.show()
+    #plt.show()
     return 'Tracé effectué !'
 
 def autolabel(rects, ax):
@@ -64,11 +67,6 @@ def autolabel(rects, ax):
                     xytext=(0, 3),  # 3 points vertical offset
                     textcoords="offset points",
                     ha='center', va='bottom')
-
-
-
-
-
 
 def mutu(filename, dist):
     gdf = use_data.create_gdf(filename, 'cheflieu') # dataframe du fichier csv choisi
@@ -89,8 +87,6 @@ def mutu(filename, dist):
                 L2.append(int(pas_mutu * 100 / n))
     return L1, L2
 
-
-
 def mean_mutu(filename, dist):
     gdf = use_data.create_gdf(filename, 'cheflieu') # dataframe du fichier csv choisi
     n = gdf.count()[0] # number of total rounds
@@ -109,8 +105,6 @@ def mean_mutu(filename, dist):
             if j == 2:
                 L2.append(int(mean_mutu))
     return L1, L2
-
-
 
 def max_mutu(filename, dist):
     gdf = use_data.create_gdf(filename, 'cheflieu') # dataframe du fichier csv choisi
@@ -132,14 +126,9 @@ def max_mutu(filename, dist):
                 L2.append(int(max_mutu))
     return L1, L2
 
-
-
-
-
-
-
 if __name__ == "__main__":
-    filenames = ["simulations_reel_gdf.csv", "simulations_gdf.csv"]
+    #filenames = ["simulations_reel_gdf.csv", "simulations_gdf.csv"]
+    filenames = ["simulations_reel_gdf.csv"] # real simulations only
     filename = "simulations_reel_gdf.csv"
     dictFilename = {"simulations_reel_gdf.csv": "reelles", "simulations_gdf.csv": "quelconques"}
     dist = [50e3, 100e3, 150e3]
@@ -147,26 +136,28 @@ if __name__ == "__main__":
     dictType = {1:"simple", 2:"double"}
 
     ###      Tracer les histogrammes      ###
-
-    # for file in filenames:
-    #     for d in dist:
-    #         for type in typeIsIn:
-    #             print(histo(file, dictFilename, d, type, dictType))
+    root = os.path.join(os.path.dirname( __file__ ), os.pardir)  # relative path to the gitignore directory
+    dirname = "/data/results/" # relative path to the gitignore directory - the function on the file _dataframes_gpd.py is adapted to find the relative path of this directory
+    print(root+dirname)
+    for file in filenames:
+        for d in dist:
+            for type in typeIsIn:
+                print(histo(file, dictFilename, d, type, dictType, path=(root+dirname)))
+                #histo(file, dictFilename, d, type, dictType)
 
 
     ###      Obtenir des comparaisons quantitatives      ###
 
-    single_incluson, double_inclusion = mutu(filename, dist)
-    type = 'Pas'
+    #single_inclusion, double_inclusion = mutu(filename, dist)
+    #type = 'Pas'
 
-    # single_incluson, double_inclusion = mean_mutu(filename, dist)
-    # type = 'Mean'
+    #single_inclusion, double_inclusion = mean_mutu(filename, dist)
+    #type = 'Mean'
 
-    # single_incluson, double_inclusion = max_mutu(filename, dist)
-    # type = 'Max'
+    #single_inclusion, double_inclusion = max_mutu(filename, dist)
+    #type = 'Max'
 
-    print(single_incluson)
-    print(double_inclusion)
-    print(histo_comparaison(single_incluson, double_inclusion, type))
-
+    #print(single_inclusion)
+    #print(double_inclusion)
+    #print(histo_comparaison(single_inclusion, double_inclusion, type))
 
